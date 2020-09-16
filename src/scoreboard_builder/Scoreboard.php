@@ -83,7 +83,7 @@ class Scoreboard
         self::__send($player, $scoreboard);
     }
 
-    protected static function delete(Player $player): void {
+    static function delete(Player $player): void {
         DeleteScoreboardPMMPService::execute($player, self::$slot);
     }
 
@@ -94,7 +94,7 @@ class Scoreboard
         //Scoreboard::$scoresには変化を与えない
         if (self::hasSameTextScore($score->getText())) {
             $text = $score->getText() . str_repeat(TextFormat::RESET, self::countSameTextScore($score->getText()));
-            new Score($text, $score->getValue(), $score->getId());
+            $score = new Score($text, $score->getValue(), $score->getId());
         }
         AddScorePMMPService::execute($player, self::$slot, $score);
     }

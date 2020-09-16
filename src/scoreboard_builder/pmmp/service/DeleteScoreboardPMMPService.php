@@ -11,7 +11,7 @@ class DeleteScoreboardPMMPService
 {
     static function execute(Player $player, ScoreboardSlot $slot):void{
         $pk = new RemoveObjectivePacket();
-        $pk->objectiveName = $slot;
+        $pk->objectiveName = $slot->getText();
         $player->sendDataPacket($pk);
     }
 }

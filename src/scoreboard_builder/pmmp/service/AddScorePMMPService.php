@@ -16,6 +16,7 @@ class AddScorePMMPService
         $entry = new ScorePacketEntry();
         $entry->objectiveName = $slot->getText();
         $entry->type = $entry::TYPE_FAKE_PLAYER;
+        $entry->customName = $score->getText();
         $entry->score = $score->getValue();
         $entry->scoreboardId = $score->getId();
 
