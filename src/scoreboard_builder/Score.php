@@ -18,14 +18,17 @@ class Score
      * @param string $text
      * @param int|null $value
      * @param int|null $id
-     * @throws \Exception
      *
      * 自動でインデックスさせる場合は$valueを指定しないでください
      */
     public function __construct(string $text, ?int $value = null, ?int $id = null) {
         $this->text = $text;
         $this->value = $value;
-        $this->id = $id ?? random_int(0, PHP_INT_MAX);
+        try {
+            $this->id = $id ?? random_int(0, PHP_INT_MAX);
+        } catch (\Exception $exception) {
+            $this->id = 0;
+        }
     }
 
 
