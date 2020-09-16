@@ -17,7 +17,7 @@ class PlayerStatusScoreboard extends Scoreboard
     private static function create(Player $player): Scoreboard {
         $scores = [
             new Score(TextFormat::RESET . "----------------------"),
-            new Score(TextFormat::BOLD . TextFormat::YELLOW . "お金:"),
+            new Score(TextFormat::BOLD . TextFormat::YELLOW . "お金:"),//new Score($text,$value)で、$valueに値を入れなければ自動で0から順にに重複していない数を与える
             new Score(TextFormat::BOLD ."> 所持金:100"),
             new Score(TextFormat::BOLD ."> 銀行残高:10000"),
 
