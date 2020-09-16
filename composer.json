@@ -1,0 +1,18 @@
+{
+  "name": "mine_deep_rock/scoreboard_builder",
+  "authors": [
+    {
+      "name": "suinua"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "": [
+        "src/"
+      ]
+    }
+  },
+  "require": {
+    "pocketmine/pocketmine-mp": "*"
+  }
+}
