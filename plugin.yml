@@ -1,0 +1,4 @@
+name: scoreboard_builder
+main: 'scoreboard_builder\Main'
+version: 1.0.0
+api: [3.0.0]
