@@ -5,6 +5,7 @@ namespace scoreboard_builder;
 
 
 use pocketmine\Player;
+use pocketmine\utils\TextFormat;
 use scoreboard_builder\pmmp\service\AddScorePMMPService;
 use scoreboard_builder\pmmp\service\DeleteScorePMMPService;
 use scoreboard_builder\pmmp\service\DeleteScoreboardPMMPService;
@@ -89,6 +90,12 @@ class Scoreboard
     public static function addScore(Player $player, Score $score): void {
         self::$scores[] = $score;
 
+        //$textが重複していたら、TextFormat::RESETを重複している分だけリピートする
+        //Scoreboard::$scoresには変化を与えない
+        if (self::hasSameTextScore($score->getText())) {
+            $text = $score->getText() . str_repeat(TextFormat::RESET, self::countSameTextScore($score->getText()));
+            new Score($text, $score->getValue(), $score->getId());
+        }
         AddScorePMMPService::execute($player, self::$slot, $score);
     }
 
