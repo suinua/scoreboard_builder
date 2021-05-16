@@ -6,50 +6,37 @@ namespace scoreboard_builder;
 
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
-use scoreboard_builder\pmmp\service\AddScorePMMPService;
-use scoreboard_builder\pmmp\service\DeleteScorePMMPService;
-use scoreboard_builder\pmmp\service\DeleteScoreboardPMMPService;
-use scoreboard_builder\pmmp\service\SendScoreboardPMMPService;
 
 class Scoreboard
 {
-    /**
-     * @var ScoreboardSlot
-     */
-    static protected $slot;
-    /**
-     * @var string
-     */
-    static protected $title;
-    /**
-     * @var ScoreSortType
-     */
-    static protected $sortType;
-    /**
-     * @var Score[]
-     */
-    static protected $scores;
+    static protected ScoreboardSlot $slot;
+    static protected string $title;
+    static protected ScoreSortType $sortType;
+    static protected array $scores;
+    static private bool $autoIndex;
 
-    //setting
-    static private $autoIndex;
-
-    private function __construct(ScoreboardSlot $slot, string $title, array $scores, ScoreSortType $sortType, bool $autoIndex = true) {
-        self::$slot = $slot;
+    private function __construct( string $title, array $scores, ScoreSortType $sortType, bool $autoIndex = true) {
         self::$title = $title;
         self::$sortType = $sortType;
         self::$scores = $scores;
         self::$autoIndex = $autoIndex;
     }
 
-    protected static function __create(ScoreboardSlot $slot, string $title, array $scores, ScoreSortType $sortType, bool $autoIndex = true): Scoreboard {
-        return new Scoreboard($slot, $title, $scores, $sortType, $autoIndex);
+    static function __setup(ScoreboardSlot $slot): void {
+        self::$slot = $slot;
+    }
+
+    protected static function __create(string $title, array $scores, ScoreSortType $sortType, bool $autoIndex = true): Scoreboard {
+        if (self::$slot === null) {
+            throw new \LogicException("Scoreboard::__createの前に、Scoreboard::initでslotを設定してください");
+        }
+        return new Scoreboard($title, $scores, $sortType, $autoIndex);
     }
 
     protected static function __send(Player $player, Scoreboard $scoreboard): void {
-        SendScoreboardPMMPService::execute($player, $scoreboard);
+        ScoreboardPMMPService::send($player, $scoreboard);
 
         if (self::$autoIndex) {
-            //指定済みのValueを取り出す
             $usedValues = [];
             foreach (self::$scores as $score) {
                 if ($score->getValue() !== null) $usedValues[] = $score->getValue();
@@ -57,13 +44,11 @@ class Scoreboard
 
             $index = 0;
             foreach ($scoreboard->getScores() as $score) {
-                //Valueの指定されているものはそのまま
                 if ($score->getValue() !== null) {
                     self::addScore($player, $score);
                     continue;
                 }
 
-                //指定されてないValueを0から順番に探していく
                 while (in_array($index, $usedValues)) {
                     $index++;
                 }
@@ -84,19 +69,21 @@ class Scoreboard
     }
 
     static function delete(Player $player): void {
-        DeleteScoreboardPMMPService::execute($player, self::$slot);
+        if (self::$slot === null) {
+            throw new \LogicException("Scoreboard::deleteの前に、Scoreboard::initでslotを設定してください");
+        }
+
+        ScoreboardPMMPService::delete($player, self::$slot);
     }
 
     public static function addScore(Player $player, Score $score): void {
         self::$scores[] = $score;
 
-        //$textが重複していたら、TextFormat::RESETを重複している分だけリピートする
-        //Scoreboard::$scoresには変化を与えない
         if (self::hasSameTextScore($score->getText())) {
             $text = $score->getText() . str_repeat(TextFormat::RESET, self::countSameTextScore($score->getText()));
             $score = new Score($text, $score->getValue(), $score->getId());
         }
-        AddScorePMMPService::execute($player, self::$slot, $score);
+        ScoreboardPMMPService::addScore($player, self::$slot, $score);
     }
 
     public static function deleteScore(Player $player, Score $targetScore): void {
@@ -106,7 +93,7 @@ class Scoreboard
             }
         }
 
-        DeleteScorePMMPService::execute($player, self::$slot, $targetScore->getId());
+        ScoreboardPMMPService::deleteScore($player, self::$slot, $targetScore->getId());
     }
 
     static function updateScore(Player $player, Score $score) {
@@ -114,37 +101,22 @@ class Scoreboard
         self::addScore($player, $score);
     }
 
-    /**
-     * @return ScoreboardSlot
-     */
     public static function getSlot(): ScoreboardSlot {
         return self::$slot;
     }
 
-    /**
-     * @return string
-     */
     public static function getTitle(): string {
         return self::$title;
     }
 
-    /**
-     * @return ScoreSortType
-     */
     public static function getSortType(): ScoreSortType {
         return self::$sortType;
     }
 
-    /**
-     * @return Score[]
-     */
     public static function getScores(): array {
         return self::$scores;
     }
 
-    /**
-     * @return bool
-     */
     public static function getAutoIndex(): bool {
         return self::$autoIndex;
     }

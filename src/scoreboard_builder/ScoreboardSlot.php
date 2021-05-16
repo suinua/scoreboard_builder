@@ -1,11 +1,12 @@
 <?php
 
+
 namespace scoreboard_builder;
 
 
 class ScoreboardSlot
 {
-    private $text;
+    private string $text;
 
     public function __construct(string $text) {
         $this->text = $text;
@@ -19,9 +20,6 @@ class ScoreboardSlot
         return new ScoreboardSlot("list");
     }
 
-    /**
-     * @return string
-     */
     public function getText(): string {
         return $this->text;
     }

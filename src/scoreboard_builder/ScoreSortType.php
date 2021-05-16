@@ -6,7 +6,7 @@ namespace scoreboard_builder;
 
 class ScoreSortType
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value) {
         $this->value = $value;
@@ -20,9 +20,6 @@ class ScoreSortType
         return new ScoreSortType(1);
     }
 
-    /**
-     * @return int
-     */
     public function getValue(): int {
         return $this->value;
     }
